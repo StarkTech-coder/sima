@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>S.I.M.A. / Mission Control</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="/style.css">
+    <script src="/app.js" defer></script>
+</head>
+
+<body>
+    <noscript>Dashboard için JavaScript etkin olmalıdır. Yerel sayfayı http://127.0.0.1:8080 adresinde açın.</noscript>
+    <header>
+        <div class="brand">
+            <div class="logo">S<span>✳</span></div>
+            <div>
+                <h1>S.I.M.A.</h1>
+                <p>STAR INTELLIGENT MISSION ARCHITECTURE</p>
+            </div>
+        </div>
+        <div class="header-right"><span class="tag">SIMULATION / LOCAL</span><span id="clock">--:--:--</span></div>
+    </header>
+    <main>
+        <section class="heading">
+            <div>
+                <div class="eyebrow">STARKTECH / OPERASYON MERKEZİ</div>
+                <h2>Derinlikleri birlikte keşfet.</h2>
+                <p>Üç bağımsız AUV. Tek görev merkezi. Bağlantıdan bağımsız yerel yürütme.</p>
+            </div>
+            <div class="mission-id"><span>MISSION 001</span><strong>PELAGIC SURVEY</strong><small>Sentetik keşif alanı ·
+                    Donanım bağlı değil</small></div>
+        </section>
+        <section class="stats">
+            <article><span>FİLO</span><strong id="online">— <small>/ 3 erişilebilir</small></strong></article>
+            <article><span>KEŞİF İLERLEMESİ</span><strong id="progress">0<small>%</small></strong></article>
+            <article><span>İLETİŞİM KATMANI</span><strong>AEGIS <small>UDP / LOOPBACK</small></strong></article>
+            <article><span>GÖREV DURUMU</span><strong id="mission-state">Hazırlanıyor</strong></article>
+        </section>
+        <div class="workspace">
+            <section class="panel map-panel">
+                <div class="panel-head">
+                    <h3><span class="dot"></span> Keşif alanı</h3><span class="muted">SENTETİK KOORDİNATLAR / 100 ×
+                        100</span>
+                </div>
+                <div class="map"><svg viewBox="0 0 1000 620" role="img"
+                        aria-label="Simüle keşif alanı ve araçların son bildirilen konumları">
+                        <defs>
+                            <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+                                <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#183746" stroke-width="0.7" />
+                            </pattern>
+                            <radialGradient id="sea">
+                                <stop stop-color="#123642" />
+                                <stop offset="1" stop-color="#081720" />
+                            </radialGradient>
+                        </defs>
+                        <rect width="1000" height="620" fill="url(#sea)" />
+                        <rect width="1000" height="620" fill="url(#grid)" />
+                        <g class="contours" fill="none" stroke="#2d6067" stroke-width="1">
+                            <path d="M-30 470 Q140 300 260 400 T560 350 T1040 250" />
+                            <path d="M-30 490 Q140 320 260 420 T560 370 T1040 270" />
+                            <path d="M-30 510 Q140 340 260 440 T560 390 T1040 290" />
+                            <path d="M-30 530 Q140 360 260 460 T560 410 T1040 310" />
+                            <path d="M-30 550 Q140 380 260 480 T560 430 T1040 330" />
+                            <path d="M600 -10 Q560 100 700 160 T1040 140" />
+                            <path d="M625 -10 Q585 100 725 160 T1040 165" />
+                            <path d="M650 -10 Q610 100 750 160 T1040 190" />
+                        </g>
+                        <g class="sector-labels"><text x="110" y="78">SEKTÖR A / BATI SIRTI</text><text x="430"
+                                y="78">SEKTÖR B / MERKEZ HAVZA</text><text x="735" y="78">SEKTÖR C / DOĞU YAMAÇ</text>
+                        </g>
+                        <g id="routes"></g>
+                        <g id="vehicles"></g><text x="30" y="592" class="map-note">GÖSTERİM AMAÇLI ALAN • GERÇEK HARİTA
+                            / SONAR DEĞİLDİR</text>
+                    </svg>
+                    <div class="map-key"><span><i class="cyan"></i>AUV-01</span><span><i
+                                class="amber"></i>AUV-02</span><span><i class="violet"></i>AUV-03</span><span
+                            class="muted">Kesik rota: planlanan • Nokta: son bildirilen konum</span></div>
+                </div>
+            </section>
+            <aside class="panel scenario">
+                <div class="panel-head">
+                    <h3>Bağlantı senaryosu</h3><span class="tag small">AUV-02</span>
+                </div>
+                <div class="signal-icon">◉ <span>···</span> ◈</div>
+                <h3 id="link-title">Başlangıç makbuzları bekleniyor</h3>
+                <p>Kesinti sırasında araç yalnızca önceden yetkilendirilmiş bölümü sürdürür. Merkez belirsiz görevi
+                    başka araca kopyalamaz.</p>
+                <div class="control-row"><button id="disconnect" disabled>Bağlantıyı kes</button><button id="reconnect"
+                        class="secondary" disabled>Yeniden bağla</button></div>
+                <p id="control-status" role="status" aria-live="polite"></p>
+                <ol>
+                    <li>Kesintiyi başlat; en az 3 saniye bekle.</li>
+                    <li>Erişilemez durumu ve korunmuş sahipliği izle.</li>
+                    <li>Yeniden bağla: snapshot → serbest bırakma makbuzu → nesil 2.</li>
+                </ol>
+                <div class="scenario-note">Demo girdisi: ilk kesinti AUV-02'ye 12 puanlık yerel enerji rezervi maliyeti
+                    uygular. Bu, fiziksel batarya modeli değildir.</div>
+            </aside>
+        </div>
+        <section id="cards" class="cards" aria-label="Araç telemetrisi"></section>
+        <div class="bottom-grid">
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Görev sahipliği</h3><span class="muted">NESİL KORUMALI ATAMA</span>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Görev</th>
+                                <th>Sahip / nesil</th>
+                                <th>Durum</th>
+                                <th>İlerleme</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasks"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="panel">
+                <div class="panel-head">
+                    <h3>Karar & olay akışı</h3><span class="muted">SON 160 OLAY</span>
+                </div>
+                <div id="events" class="events" role="log" aria-label="Karar günlüğü"></div>
+            </section>
+        </div>
+        <footer><span><b>SIMULATION ONLY</b> · Kritik araç kontrolü yok · Akustik modem / DTN / ROS 2 yok</span><span
+                id="sync">Merkeze bağlanılıyor…</span></footer>
+    </main>
+</body>
+
+</html>
