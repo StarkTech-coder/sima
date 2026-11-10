@@ -14,6 +14,45 @@ Open **http://127.0.0.1:8080**. An alternate loopback address can be selected wi
 
 The first build downloads Go dependencies; subsequent execution of a prebuilt binary requires no internet. To prepare an offline demonstration, build with `go build -o sima-sim ./cmd/sima-sim` on the target platform while dependencies are available. All dashboard assets are embedded.
 
+## Python environments (separate by purpose)
+
+S.I.M.A. uses two separate Python contexts:
+
+1. **Project-local developer environment** (`.venv`, Python 3.11)
+	- Used for local Python tooling/scripts that are not ROS runtime-bound.
+	- Created with:
+
+	```sh
+	/opt/homebrew/bin/python3.11 -m venv .venv
+	```
+
+	- `rclpy` and ROS 2 packages are intentionally **not** installed into `.venv`.
+
+2. **ROS 2 runtime environment** (Docker, ROS 2 Humble)
+	- Used for `scripts/ros2/bridge_node.py` and ROS vehicle simulators.
+	- Defined by [scripts/ros2/Dockerfile](scripts/ros2/Dockerfile) and [scripts/ros2/docker-compose.yml](scripts/ros2/docker-compose.yml).
+	- The bridge must run inside this ROS 2 environment (not from `.venv`).
+
+### VS Code interpreter configuration
+
+- Open Command Palette → **Python: Select Interpreter**.
+- Choose the workspace interpreter at `.venv/bin/python` for local project Python work.
+- Keep ROS bridge execution in Docker/ROS environment via compose commands below.
+
+### ROS 2 bridge runtime (Docker)
+
+From [scripts/ros2](scripts/ros2):
+
+```sh
+docker compose up -d --build
+```
+
+This starts:
+- `bridge`: HTTP ↔ ROS topic bridge (`/v1/telemetry/*`, `/v1/command`)
+- `auv01`, `auv02`, `auv03`: ROS 2 simulated vehicles
+
+> Important: ROS 2/rclpy verification depends on a running Docker daemon and the actual container runtime. If Docker is unavailable, ROS 2 bridge import/runtime cannot be claimed as verified.
+
 ## Demonstrate
 
 1. Wait until initial assignment receipts are confirmed and the control buttons become active.

@@ -1,2 +1,5 @@
 /sima-sim
 /coverage.out
+.venv/__pycache__/
+*.py[cod]
+.venv/

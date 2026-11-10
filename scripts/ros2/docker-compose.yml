@@ -1,0 +1,51 @@
+services:
+  bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["bash", "-lc", "source /opt/ros/humble/setup.bash && python3 /workspace/scripts/ros2/bridge_node.py"]
+    volumes:
+      - ../..:/workspace
+    ports:
+      - "8090:8090"
+
+  auv01:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SIMA_VEHICLE_ID: AUV-01
+      SIMA_X: 10
+      SIMA_Y: 20
+    command: ["bash", "-lc", "source /opt/ros/humble/setup.bash && python3 /workspace/scripts/ros2/sim_vehicle.py"]
+    volumes:
+      - ../..:/workspace
+    depends_on: [bridge]
+
+  auv02:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SIMA_VEHICLE_ID: AUV-02
+      SIMA_X: 35
+      SIMA_Y: 25
+      SIMA_DISCONNECT_AFTER: 20
+      SIMA_DISCONNECT_DURATION: 15
+    command: ["bash", "-lc", "source /opt/ros/humble/setup.bash && python3 /workspace/scripts/ros2/sim_vehicle.py"]
+    volumes:
+      - ../..:/workspace
+    depends_on: [bridge]
+
+  auv03:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      SIMA_VEHICLE_ID: AUV-03
+      SIMA_X: 60
+      SIMA_Y: 30
+    command: ["bash", "-lc", "source /opt/ros/humble/setup.bash && python3 /workspace/scripts/ros2/sim_vehicle.py"]
+    volumes:
+      - ../..:/workspace
+    depends_on: [bridge]
